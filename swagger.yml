@@ -1,0 +1,345 @@
+swagger: '2.0'
+info:
+  title: InterNation
+  description: InterNation api docs.
+  version: 1.0.0
+
+responses:
+  Unauthorized:
+    description: 'User not authenticated'
+    schema:
+      $ref: '#/definitions/Error'
+  AccessDenied:
+    description: 'Access denied for user'
+    schema:
+      $ref: '#/definitions/Error'
+  NotFound:
+    description: 'Entity not found'
+    schema:
+      $ref: '#/definitions/Error'
+  Empty:
+    description: 'Empty response'
+
+definitions:
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      name:
+        type: string
+        example: 'Mahmoud'
+      created_at:
+        type: integer
+        example: 123214124
+      memberships_count:
+        type: integer
+        example: 2
+  Group:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      name:
+        type: string
+        example: 'Group1'
+      created_at:
+        type: integer
+        example: 123214124
+      memberships_count:
+        type: integer
+        example: 2
+
+  Membership:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      user_id:
+        type: integer
+        example: 1
+      group_id:
+        type: integer
+        example: 1
+      created_at:
+        type: integer
+        example: 123214124
+
+  Error:
+    type: object
+    properties:
+      message:
+        type: string
+        example: 'Error message'
+
+  ValidationError:
+    type: object
+    properties:
+      message:
+        type: string
+        example: 'This value is already used.'
+      name:
+        type: string
+        example: 'name'
+
+paths:
+  /api/users:
+    get:
+      parameters:
+        - name: per_page
+          in: query
+          description: count per page
+          type: integer
+        - name: page
+          in: query
+          description: page number
+          type: integer
+      responses:
+        200:
+          description: List of users
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/AccessDenied'
+        204:
+          $ref: '#/responses/Empty'
+      security:
+        - APIKeyHeader: []
+    post:
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: 'kostas'
+      responses:
+        200:
+          description: Created user
+          schema:
+            $ref: '#/definitions/User'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/AccessDenied'
+        400:
+          description: "Validation error"
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: 'User validation Exception.'
+              fields:
+                type: array
+                items:
+                  $ref: '#/definitions/ValidationError'
+
+      security:
+        - APIKeyHeader: []
+  '/api/users/{id}':
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'Delete user'
+          schema:
+            type: object
+        404:
+          $ref: '#/responses/NotFound'
+        422:
+          description: 'User can delete him self'
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/AccessDenied'
+      security:
+        - APIKeyHeader: []
+  /api/groups:
+    get:
+      parameters:
+        - name: per_page
+          in: query
+          description: count per page
+          type: integer
+        - name: page
+          in: query
+          description: page number
+          type: integer
+      responses:
+        200:
+          description: List of groups
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Group'
+        204:
+          $ref: '#/responses/Empty'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/AccessDenied'
+
+      security:
+        - APIKeyHeader: []
+    post:
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: 'Group2'
+      responses:
+        200:
+          description: Created group
+          schema:
+            $ref: '#/definitions/Group'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/AccessDenied'
+        400:
+          description: "Validation error"
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: 'Group validation Exception.'
+              fields:
+                type: array
+                items:
+                  $ref: '#/definitions/ValidationError'
+      security:
+        - APIKeyHeader: []
+  '/api/groups/{id}':
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'Delete group'
+          schema:
+            type: object
+        404:
+          $ref: '#/responses/NotFound'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/AccessDenied'
+      security:
+        - APIKeyHeader: []
+  /api/memberships:
+    get:
+      parameters:
+        - name: per_page
+          in: query
+          description: count per page
+          type: integer
+        - name: page
+          in: query
+          description: page number
+          type: integer
+        - name: group_id
+          in: query
+          description: filter by group_id
+          type: string
+        - name: user_id
+          in: query
+          description: filter by user_id
+          type: string
+      responses:
+        200:
+          description: List of memberships
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Membership'
+        204:
+          $ref: '#/responses/Empty'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/AccessDenied'
+      security:
+        - APIKeyHeader: []
+    post:
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: integer
+                example: 1
+              group_id:
+                type: integer
+                example: 1
+      responses:
+        200:
+          description: Created membership
+          schema:
+            $ref: '#/definitions/Membership'
+        404:
+          $ref: '#/responses/NotFound'
+        422:
+          description: 'Membership already created'
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/AccessDenied'
+      security:
+        - APIKeyHeader: []
+  '/api/memberships/{id}':
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'Delete membership'
+          schema:
+            type: object
+        404:
+          $ref: '#/responses/NotFound'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/AccessDenied'
+      security:
+        - APIKeyHeader: []
+securityDefinitions:
+  APIKeyHeader:
+    name: X-AUTH-TOKEN
+    type: apiKey
+    in: header
+    description: X-AUTH-TOKEN
